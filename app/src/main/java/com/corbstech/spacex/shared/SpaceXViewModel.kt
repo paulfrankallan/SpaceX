@@ -163,10 +163,10 @@ open class SpaceXViewModel @Inject constructor(
     // region Actions
 
     private suspend fun handleActions() {
-        actionDispatcher.collect { intent ->
-            when (intent) {
+        actionDispatcher.collect { action ->
+            when (action) {
                 is Action.Sort -> {
-                    updateLaunchItems(intent.order)
+                    updateLaunchItems(action.order)
                 }
             }
         }
