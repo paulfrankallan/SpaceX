@@ -1,0 +1,17 @@
+buildscript {
+    ext.kotlinVersion = '1.6.10'
+    ext.hiltVersion = '2.40.5'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.0.4"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltVersion"
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

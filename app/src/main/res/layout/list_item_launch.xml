@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:layout_marginHorizontal="16dp"
+    >
+
+    <ImageView
+        android:id="@+id/image_patch"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:contentDescription="@string/launch_image"
+        app:layout_constraintEnd_toStartOf="@+id/labelMission"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/labelMission"
+        app:layout_constraintBottom_toBottomOf="@id/labelDateTime"
+        tools:src="@drawable/ic_launcher_foreground"
+        />
+
+    <TextView
+        android:id="@+id/labelMission"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/mission"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/labelDateTime"
+        app:layout_constraintStart_toEndOf="@id/image_patch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@string/mission"
+        />
+
+    <TextView
+        android:id="@+id/labelDateTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/dateTime"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/labelRocket"
+        app:layout_constraintStart_toEndOf="@id/image_patch"
+        app:layout_constraintTop_toBottomOf="@+id/labelMission"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@string/dateTime"
+        />
+
+    <TextView
+        android:id="@+id/labelRocket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/rocket"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/labelDays"
+        app:layout_constraintStart_toEndOf="@id/image_patch"
+        app:layout_constraintTop_toBottomOf="@+id/labelDateTime"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@string/rocket"
+        />
+
+    <TextView
+        android:id="@+id/labelDays"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/days"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/image_patch"
+        app:layout_constraintTop_toBottomOf="@+id/labelRocket"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@string/days"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="labelDays,labelRocket,labelDateTime, labelMission"
+        />
+
+    <TextView
+        android:id="@+id/valueMission"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/mission"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/labelMission"
+        app:layout_constraintTop_toTopOf="@+id/labelMission"
+        app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Mission name"
+        />
+
+    <TextView
+        android:id="@+id/valueDateTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/dateTime"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/labelDateTime"
+        app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="@+id/labelDateTime"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="22/02/2022"
+        />
+
+    <TextView
+        android:id="@+id/valueRocket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/rocket"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/labelRocket"
+        app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="@+id/labelRocket"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Rocket name"
+        />
+
+    <TextView
+        android:id="@+id/valueDays"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/days"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/labelDays"
+        app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="@+id/labelDays"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="88"
+        />
+
+    <ImageView
+        android:id="@+id/image_success"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:contentDescription="@string/launch_image"
+        android:src="@drawable/tick"
+        app:layout_constraintBottom_toBottomOf="@id/valueDateTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/valueMission"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

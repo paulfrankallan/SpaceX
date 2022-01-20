@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">SpaceX</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">FILTER</string>
+    <string name="action_filter">Filter</string>
+    <string name="menu_launch_year">Launch Year</string>
+    <string name="menu_launch_success">Launch Success</string>
+    <string name="company_info">%1$s was founded by %2$s in %3$d. It has now %4$d employees, %5$d launch sites, and is valued at USD %6$s.</string>
+    <string name="launch_image">Launch Image</string>
+    <string name="mission">Mission:</string>
+    <string name="dateTime">Date/time:</string>
+    <string name="rocket">Rocket:</string>
+    <string name="days">Days from now:</string>
+    <string name="sort">SORT</string>
+    <string name="company">COMPANY</string>
+    <string name="launches">LAUNCHES</string>
+    <string name="failed">Failed</string>
+    <string name="succeeded">Succeeded</string>
+    <string name="desc">DESC</string>
+    <string name="asc">ASC</string>
+    <string name="launch_success">LAUNCH SUCCESS</string>
+    <string name="launch_year">LAUNCH YEAR</string>
+</resources>
