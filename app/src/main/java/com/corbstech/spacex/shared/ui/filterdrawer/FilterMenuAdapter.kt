@@ -70,18 +70,14 @@ class FilterMenuAdapter(
     ): View {
         var view = convertView
         val childText = getChild(groupPosition, childPosition) as String
-
         if (view == null) {
             val inflater = this.mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.filter_child, parent, false)
         }
-
         val childName = view!!
             .findViewById(R.id.child_title) as TextView
-
         childName.text = childText
-
         return view
     }
 

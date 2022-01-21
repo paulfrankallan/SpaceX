@@ -144,7 +144,7 @@
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:contentDescription="@string/launch_image"
-        android:src="@drawable/tick"
+        tools:src="@drawable/ic_check"
         app:layout_constraintBottom_toBottomOf="@id/valueDateTime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/valueMission"

@@ -10,9 +10,11 @@ import com.corbstech.spacex.feature.home.api.SpaceXApi
 import com.corbstech.spacex.feature.home.data.model.Company
 import com.corbstech.spacex.feature.home.data.model.Launch
 import com.corbstech.spacex.feature.home.data.model.LaunchData
+import com.corbstech.spacex.feature.home.data.model.Links
 import com.corbstech.spacex.feature.home.list.company.CompanyItem
 import com.corbstech.spacex.feature.home.list.header.HeaderItem
 import com.corbstech.spacex.feature.home.list.launch.LaunchItem
+import com.corbstech.spacex.feature.home.list.launch.LaunchItemLink
 import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuData
 import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuItem
 import com.corbstech.spacex.shared.ui.list.RecyclerItem
@@ -21,7 +23,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -35,10 +37,10 @@ open class SpaceXViewModel @Inject constructor(
     private val resourceProvider: ResourceProvider
 ) : ViewModel() {
 
+    private val actionDispatcher = MutableSharedFlow<Action>()
     private val mutableState = MutableStateFlow(ViewSate())
     val state: StateFlow<ViewSate>
         get() = mutableState
-    val actionDispatcher = MutableSharedFlow<Action>()
 
     init {
         viewModelScope.launch {
@@ -100,25 +102,6 @@ open class SpaceXViewModel @Inject constructor(
         )
     }
 
-    private fun buildLaunchItemsList(launches: List<Launch>): List<LaunchItem> {
-        return launches.map {
-            val zonedDateTime = Instant.parse(it.dateUtc).atZone(ZoneId.systemDefault())
-            LaunchItem(
-                mission = it.name,
-                date = zonedDateTime.getDisplayDateTimeFromZonedDateTime(),
-                year = zonedDateTime.getYearFromZonedDateTime(),
-                rocket = it.rocket?.name ?: "/" + it.rocket?.type, // TODO
-                daysLabelAndValue = zonedDateTime.getDaysBetweenFromZonedDateTime(),
-                patchImage = it.links?.patch?.small?.replace("https", "http"), // TODO
-                successImage = if (it.success) {
-                    R.drawable.tick
-                } else {
-                    R.drawable.cross
-                }
-            )
-        }
-    }
-
     private fun sortLaunchItems(
         launchItems: List<LaunchItem>,
         order: Order
@@ -128,12 +111,49 @@ open class SpaceXViewModel @Inject constructor(
         Order.DESC -> launchItems.sortedByDescending { it.year }
     }
 
+    private fun buildLaunchItemsList(launches: List<Launch>) = launches.map { launch ->
+        val zonedDateTime = Instant.parse(launch.dateUtc).atZone(ZoneId.systemDefault())
+        LaunchItem(
+            mission = launch.name,
+            date = zonedDateTime.getDisplayDateTimeFromZonedDateTime(),
+            year = zonedDateTime.getYearFromZonedDateTime(),
+            rocket = launch.rocket?.name ?: "/" + launch.rocket?.type, // TODO
+            daysLabelAndValue = zonedDateTime.getDaysBetweenFromZonedDateTime(),
+            patchImage = launch.links?.patch?.small?.replace("https", "http"), // TODO
+            successImage = if (launch.success) {
+                R.drawable.ic_check
+            } else {
+                R.drawable.ic_cross
+            },
+            links = buildLaunchItemLinks(launch.links)
+        )
+    }
+
+    // endregion
+
+    // region Launch item links
+
+    private fun buildLaunchItemLinks(links: Links?) = listOf(
+        LaunchItemLink(url = links?.articleLink, title = "Article"),
+        LaunchItemLink(url = links?.webcast, title = "Video"),
+        LaunchItemLink(url = links?.wikipedia, title = "Wikipedia")
+    ).filterNot { it.url.isNullOrBlank() }
+
+    private fun onLaunchItemLinkClicked(launchItemLink: LaunchItemLink) =
+        launchItemLink.url?.let { url ->
+            mutableState.update { current ->
+                current.copy(
+                    events = current.events + Event.LaunchWebBrowser(url = url)
+                )
+            }
+        }
+
     // endregion
 
     // region Filter menu
 
-    private fun buildFilterMenu(launchItems: List<LaunchItem>): FilterMenuData {
-        return FilterMenuData(
+    private fun buildFilterMenu(launchItems: List<LaunchItem>) =
+        FilterMenuData(
             headerList = listOf(
                 FilterMenuItem((resourceProvider.getResource(R.string.sort))),
                 FilterMenuItem((resourceProvider.getResource(R.string.launch_year))),
@@ -156,20 +176,34 @@ open class SpaceXViewModel @Inject constructor(
                         )
             )
         )
-    }
 
     // endregion
 
     // region Actions
 
-    private suspend fun handleActions() {
-        actionDispatcher.collect { action ->
-            when (action) {
-                is Action.Sort -> {
-                    updateLaunchItems(action.order)
-                }
+    fun dispatch(action: Action) = viewModelScope.launch {
+        actionDispatcher.emit(action)
+    }
+
+    private suspend fun handleActions(): Nothing = actionDispatcher.collect { action ->
+        when (action) {
+            is Action.Sort -> {
+                updateLaunchItems(action.order)
+            }
+            is Action.LaunchItemLinkClicked -> {
+                onLaunchItemLinkClicked(action.launchItemLink)
             }
         }
+    }
+
+    // endregion
+
+    // region Events
+
+    fun removeConsumedEvent(eventId: String) = mutableState.update { current ->
+        current.copy(
+            events = current.events.filterNot { it.uniqueId == eventId }
+        )
     }
 
     // endregion

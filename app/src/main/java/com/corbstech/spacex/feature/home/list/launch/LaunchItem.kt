@@ -1,6 +1,7 @@
 package com.corbstech.spacex.feature.home.list.launch
 
 import com.corbstech.spacex.shared.ui.list.RecyclerItem
+import com.corbstech.spacex.shared.ui.list.RecyclerItemClicked
 
 data class LaunchItem(
     override val id: String = "",
@@ -9,6 +10,7 @@ data class LaunchItem(
     val year: Int?,
     val rocket: String?,
     val daysLabelAndValue: Pair<String, String>?,
-    var patchImage: String? = null,
-    var successImage: Int? = null
-) : RecyclerItem
+    val patchImage: String? = null,
+    val successImage: Int? = null,
+    val links: List<LaunchItemLink>,
+) : RecyclerItem, RecyclerItemClicked

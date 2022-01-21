@@ -20,8 +20,6 @@ import com.corbstech.spacex.shared.ViewSate
 import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuAdapter
 import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuData
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import java.util.*
 
 @AndroidEntryPoint
@@ -99,8 +97,23 @@ class SpaceXActivity :
         )
     }
 
+    // Are filters applied
+
+    private fun getActiveGroup(groupIndex: Int) = when (groupIndex) {
+        0 -> {
+
+        }
+        1 -> {
+
+        }
+        2 -> {
+
+        }
+        else -> {}
+    }
+
     override fun onGroupClick(
-        parent: ExpandableListView, // TODO PFA REMOVED ?
+        parent: ExpandableListView,
         v: View?,
         groupPosition: Int,
         id: Long
@@ -119,10 +132,10 @@ class SpaceXActivity :
                         viewGroup?.setBackgroundColor(Color.parseColor("#333333"))
                         when (childPosition) {
                             FILTER_MENU_INDEX_SORT_ASC -> {
-                                dispatch(Action.Sort(Order.ASC))
+                                spaceXViewModel.dispatch(Action.Sort(Order.ASC))
                             }
                             FILTER_MENU_INDEX_SORT_DESC -> {
-                                dispatch(Action.Sort(Order.DESC))
+                                spaceXViewModel.dispatch(Action.Sort(Order.DESC))
                             }
                         }
                         nestedParent.expandGroup(nestedGroupPosition)
@@ -169,14 +182,6 @@ class SpaceXActivity :
     }
 
     // endregion
-
-    private fun dispatch(action: Action) {
-        lifecycleScope.launch {
-            spaceXViewModel.actionDispatcher.emit(
-                action
-            )
-        }
-    }
 
     companion object {
         private const val FILTER_MENU_INDEX_SORT_ASC = 0

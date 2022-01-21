@@ -25,14 +25,13 @@ data class Rocket(
 
 data class Links(
     @SerializedName("patch") val patch: Patch?,
-    @SerializedName("article_link") val articleLink: String?,
-    @SerializedName("video_link") val videoLink: String?,
-    @SerializedName("reddit_campaign") val redditLink: String?,
-    @SerializedName("youtube_id") val youTubeId: String?
+    @SerializedName("article") val articleLink: String?,
+    @SerializedName("youtube_id") val youTubeId: String?,
+    @SerializedName("webcast") val webcast: String?,
+    @SerializedName("wikipedia") val wikipedia: String?
 )
 
 data class Patch(
     @SerializedName("small") var small: String?,
     @SerializedName("large") val large: String?,
 )
-
