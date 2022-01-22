@@ -96,19 +96,27 @@ open class SpaceXViewModel @Inject constructor(
 
     // region Launch items
 
-    private fun updateLaunchItems(order: Order) {
-        mutableState.value = state.value.copy(
-            launchItems = sortLaunchItems(state.value.launchItems, order)
-        )
+    private fun updateLaunchItems(filterMenuEvent: FilterMenuItem.FilterMenuEvent) {
+        mutableState.update { current ->
+
+            current.copy()
+        }
     }
 
-    private fun sortLaunchItems(
-        launchItems: List<LaunchItem>,
+    private fun List<LaunchItem>.filterLaunchItems(
+        filterType: FilterMenuItem.FilterType
+    ) = when (filterType) {
+        is FilterMenuItem.FilterType.Year -> this
+        is FilterMenuItem.FilterType.Success -> this
+        is FilterMenuItem.FilterType.None -> this
+    }
+
+    private fun List<LaunchItem>.sortLaunchItems(
         order: Order
     ) = when (order) {
-        Order.NONE -> launchItems
-        Order.ASC -> launchItems.sortedBy { it.year }
-        Order.DESC -> launchItems.sortedByDescending { it.year }
+        Order.None -> this
+        Order.Asc -> this.sortedBy { it.year }
+        Order.Desc -> this.sortedByDescending { it.year }
     }
 
     private fun buildLaunchItemsList(launches: List<Launch>) = launches.map { launch ->
@@ -152,30 +160,57 @@ open class SpaceXViewModel @Inject constructor(
 
     // region Filter menu
 
-    private fun buildFilterMenu(launchItems: List<LaunchItem>) =
-        FilterMenuData(
-            headerList = listOf(
-                FilterMenuItem((resourceProvider.getResource(R.string.sort))),
-                FilterMenuItem((resourceProvider.getResource(R.string.launch_year))),
-                FilterMenuItem((resourceProvider.getResource(R.string.launch_success))),
+    private fun buildFilterMenu(launchItems: List<LaunchItem>): FilterMenuData {
+        val headerList = listOf(
+            FilterMenuItem(
+                itemName = resourceProvider.getResource(R.string.sort),
+                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
             ),
+            FilterMenuItem(
+                itemName = resourceProvider.getResource(R.string.launch_year),
+                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
+            ),
+            FilterMenuItem(
+                itemName = resourceProvider.getResource(R.string.launch_success),
+                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
+            ),
+        )
+        return FilterMenuData(
+            headerList = headerList,
             childList = hashMapOf(
-                FilterMenuItem((resourceProvider.getResource(R.string.sort))) to
-                        listOf(
-                            resourceProvider.getResource(R.string.asc),
-                            resourceProvider.getResource(R.string.desc)
-                        ),
-                FilterMenuItem((resourceProvider.getResource(R.string.launch_year))) to
-                        launchItems.distinctBy { it.year }
-                            .sortedByDescending { it.year }
-                            .mapNotNull { it.year?.toString() }.toMutableList(),
-                FilterMenuItem((resourceProvider.getResource(R.string.launch_success))) to
-                        listOf(
-                            resourceProvider.getResource(R.string.succeeded),
-                            resourceProvider.getResource(R.string.failed)
+                headerList[0] to listOf(
+                    FilterMenuItem(
+                        itemName = resourceProvider.getResource(R.string.asc),
+                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort(Order.Asc)
+                    ),
+                    FilterMenuItem(
+                        itemName = resourceProvider.getResource(R.string.desc),
+                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort(Order.Desc)
+                    )
+                ),
+                headerList[1] to launchItems.distinctBy { it.year }
+                    .mapNotNull { it.year }
+                    .sortedByDescending { it }
+                    .map {
+                        FilterMenuItem(
+                            itemName = it.toString(),
+                            filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
                         )
+                    },
+                headerList[2] to listOf(
+                    FilterMenuItem(
+                        itemName = resourceProvider.getResource(R.string.succeeded),
+                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
+                    ),
+                    FilterMenuItem(
+                        itemName = resourceProvider.getResource(R.string.failed),
+                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
+                    )
+                )
             )
         )
+    }
+
 
     // endregion
 
@@ -187,13 +222,49 @@ open class SpaceXViewModel @Inject constructor(
 
     private suspend fun handleActions(): Nothing = actionDispatcher.collect { action ->
         when (action) {
-            is Action.Sort -> {
-                updateLaunchItems(action.order)
-            }
             is Action.LaunchItemLinkClicked -> {
                 onLaunchItemLinkClicked(action.launchItemLink)
             }
+            is Action.FilterMenuItemClicked -> {
+                onFilterMenuItemClicked(action.filterMenuItem)
+            }
         }
+    }
+
+    private fun onFilterMenuItemClicked(filterMenuItem: FilterMenuItem) {
+        updateFilterMenuItem(filterMenuItem)
+        updateLaunchItems(filterMenuItem.filterMenuEvent)
+    }
+
+    private fun updateFilterMenuItem(filterMenuItem: FilterMenuItem) {
+
+//        filterMenuItem.copy(selected = filterMenuItem.selected.not())
+//
+//        val match = mutableState.value.filterMenuData.childList.values.flatten().first {
+//            it.uniqueId == filterMenuItem.uniqueId
+//        }.data
+
+        mutableState.update { current ->
+
+            val children = current.filterMenuData.childList.toMutableMap().forEach {
+                it.value.firstOrNull { item ->
+                    item.uniqueId == filterMenuItem.uniqueId
+                }
+            }
+            //children.replace(filterMenuItem, filterMenuItem, filterMenuItem)
+
+            current.copy(
+                filterMenuData = current.filterMenuData.copy(
+                    childList = current.filterMenuData.childList
+                )
+            )
+        }
+        // filterNot { it.uniqueId == eventId }
+//        filterMenuItem.data
+    }
+
+    private fun updateYears(year: String) {
+        val result = year
     }
 
     // endregion

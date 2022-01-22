@@ -21,4 +21,5 @@
     <string name="asc">ASC</string>
     <string name="launch_success">LAUNCH SUCCESS</string>
     <string name="launch_year">LAUNCH YEAR</string>
+    <string name="tick_icon">Tick Icon</string>
 </resources>
