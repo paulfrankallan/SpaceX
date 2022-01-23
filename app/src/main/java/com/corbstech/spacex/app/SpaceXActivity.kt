@@ -7,18 +7,15 @@ import android.view.View
 import android.widget.ExpandableListView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat.END
 import androidx.lifecycle.lifecycleScope
 import com.corbstech.spacex.R
 import com.corbstech.spacex.databinding.ActivitySpacexBinding
-import com.corbstech.spacex.shared.Action
-import com.corbstech.spacex.shared.SpaceXViewModel
-import com.corbstech.spacex.shared.ViewSate
-import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuAdapter
-import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuData
+import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuAdapter
+import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuData
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
-import androidx.core.content.ContextCompat
 
 @AndroidEntryPoint
 class SpaceXActivity :
@@ -75,6 +72,10 @@ class SpaceXActivity :
         updateFilterIcon(state.filterMenuData.filtersApplied)
     }
 
+    // endregion
+
+    // region Filter menu
+
     private fun updateFilterIcon(filtersApplied: Boolean) {
         if (filtersApplied) {
             filterIcon = R.drawable.ic_filter_check_outline
@@ -83,10 +84,6 @@ class SpaceXActivity :
         }
         invalidateOptionsMenu()
     }
-
-    // endregion
-
-    // region Filter menu
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

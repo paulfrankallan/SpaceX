@@ -1,9 +1,9 @@
 package com.corbstech.spacex.app
 
 import android.content.Context
-import com.corbstech.spacex.feature.home.api.SpaceXClient
-import com.corbstech.spacex.shared.DefaultResourceProvider
-import com.corbstech.spacex.shared.ResourceProvider
+import com.corbstech.spacex.app.api.SpaceXClient
+import com.corbstech.spacex.app.framework.DefaultResourceProvider
+import com.corbstech.spacex.app.framework.ResourceProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +23,7 @@ class SpaceXAppModule {
     @Provides
     fun providesWeatherAppClient(
         @ApplicationContext context: Context
-    ) = SpaceXClient(context).api
+    ) = SpaceXClient().api
 
     @Provides
     fun providesDispatcher() = Dispatchers.IO

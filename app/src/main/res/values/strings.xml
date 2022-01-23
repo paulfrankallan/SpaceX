@@ -26,4 +26,5 @@
     <string name="article">Article</string>
     <string name="video">Video</string>
     <string name="wikipedia">Wikipedia</string>
+    <string name="progress_spinner_image">Progress Spinner Image</string>
 </resources>

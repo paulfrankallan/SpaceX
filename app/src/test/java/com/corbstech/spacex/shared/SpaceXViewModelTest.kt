@@ -1,16 +1,17 @@
 package com.corbstech.spacex.shared
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
-import com.corbstech.spacex.feature.home.api.SpaceXApi
-import com.corbstech.spacex.feature.home.list.launch.LaunchItemLink
+import com.corbstech.spacex.app.Action
+import com.corbstech.spacex.app.SpaceXViewModel
+import com.corbstech.spacex.app.api.SpaceXApi
+import com.corbstech.spacex.app.framework.ResourceProvider
+import com.corbstech.spacex.feature.list.launch.LaunchItemLink
 import com.nhaarman.mockitokotlin2.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -67,7 +68,8 @@ class SpaceXViewModelTest {
     fun dispatch() {
 
         runBlocking {
-            spaceXViewModel.dispatch(Action.LaunchItemLinkClicked(LaunchItemLink(
+            spaceXViewModel.dispatch(
+                Action.LaunchItemLinkClicked(LaunchItemLink(
                 title = "Google",
                 url = "www.google.com"
             )))
