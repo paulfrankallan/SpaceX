@@ -17,36 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone"
-        >
-
-        <include
-            android:id="@+id/header1"
-            layout="@layout/list_item_header"
-            />
-
-        <include
-            android:id="@+id/company"
-            layout="@layout/list_item_company"
-            app:layout_constraintTop_toBottomOf="@id/header1"
-            />
-
-        <include
-            android:id="@+id/header2"
-            layout="@layout/list_item_header"
-            />
-
-        <include
-            android:id="@+id/launch"
-            layout="@layout/list_item_launch"
-            />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
     <ImageView
         android:id="@+id/progress_spinner"
         android:layout_width="48dp"
@@ -57,5 +27,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+
+    <FrameLayout
+        android:id="@+id/no_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <include layout="@layout/no_content_layout" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

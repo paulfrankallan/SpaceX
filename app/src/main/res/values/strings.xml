@@ -27,4 +27,7 @@
     <string name="video">Video</string>
     <string name="wikipedia">Wikipedia</string>
     <string name="progress_spinner_image">Progress Spinner Image</string>
+    <string name="no_data_image">No data image</string>
+    <string name="no_data">No Data Available</string>
+    <string name="no_data_message">Check your internet connection and try again</string>
 </resources>

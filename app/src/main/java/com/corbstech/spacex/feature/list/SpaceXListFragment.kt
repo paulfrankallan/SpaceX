@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -74,6 +75,8 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
 
     private fun handleState(state: ViewSate) {
         listAdapter.submitList(state.getItems())
+        updateProgressSpinner(state.refreshing)
+        handleNoData(state)
         state.events.forEach { event ->
             when (event) {
                 is Event.LaunchWebBrowser -> {
@@ -81,7 +84,6 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
                 }
             }
         }
-        updateProgressSpinner(state.refreshing)
     }
 
     // endregion
@@ -168,6 +170,15 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
             delay(remainingTimeMillis)
             fragmentHomeBinding?.progressSpinner?.visibility = View.GONE
         }
+    }
+
+    // endregion
+
+    // region No data
+
+    private fun handleNoData(state: ViewSate) = state.apply {
+        fragmentHomeBinding?.listRecyclerview?.isVisible = !noData
+        fragmentHomeBinding?.noContentLayout?.isVisible = noData
     }
 
     // endregion

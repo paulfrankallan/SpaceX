@@ -72,7 +72,7 @@ open class SpaceXViewModel @Inject constructor(
                 }
             } catch (e: Throwable) {
                 mutableState.update { current ->
-                    current.copy(refreshing = false)
+                    current.copy(refreshing = false, noData = true)
                 }
             }
         }
@@ -92,7 +92,8 @@ open class SpaceXViewModel @Inject constructor(
                         filterMenuData = buildFilterMenu(launchItems),
                         staticItems = buildStaticItemsList(company = company),
                         launchItems = launchItems,
-                        refreshing = false
+                        refreshing = false,
+                        noData = false
                     )
                 }
             }

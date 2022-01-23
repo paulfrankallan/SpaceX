@@ -13,6 +13,7 @@ data class ViewSate(
     val launchItems: List<LaunchItem> = listOf(),
     val events: List<Event> = emptyList(),
     val refreshing: Boolean = true,
+    val noData: Boolean = false,
 ) {
     fun getItems() = listOf(staticItems, launchItems).flatten()
 }

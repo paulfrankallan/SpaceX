@@ -27,7 +27,7 @@ class SpaceXActivity :
     private lateinit var binding: ActivitySpacexBinding
     private val spaceXViewModel: SpaceXViewModel by viewModels()
     private lateinit var filterMenuAdapter: FilterMenuAdapter
-    private var filterIcon: Int = R.drawable.ic_filter_outline
+    private var filterIcon: Int? = null
 
     // endregion
 
@@ -69,18 +69,18 @@ class SpaceXActivity :
 
     private fun handleState(state: ViewSate) {
         renderFilterMenu(state.filterMenuData)
-        updateFilterIcon(state.filterMenuData.filtersApplied)
+        updateFilterIcon(state)
     }
 
     // endregion
 
     // region Filter menu
 
-    private fun updateFilterIcon(filtersApplied: Boolean) {
-        if (filtersApplied) {
-            filterIcon = R.drawable.ic_filter_check_outline
-        } else {
-            filterIcon = R.drawable.ic_filter_outline
+    private fun updateFilterIcon(state: ViewSate) {
+        filterIcon = when {
+            state.noData -> null
+            state.filterMenuData.filtersApplied -> R.drawable.ic_filter_check_outline
+            else -> R.drawable.ic_filter_outline
         }
         invalidateOptionsMenu()
     }
@@ -101,7 +101,12 @@ class SpaceXActivity :
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val settingsItem = menu.findItem(R.id.action_filter)
-        settingsItem.icon = ContextCompat.getDrawable(this, filterIcon)
+        filterIcon?.let {
+            settingsItem.icon = ContextCompat.getDrawable(this, it)
+            settingsItem.isVisible = true
+        } ?: run {
+            settingsItem.isVisible = false
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
