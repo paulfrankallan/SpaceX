@@ -12,11 +12,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.corbstech.spacex.R
 
-// TODO - Tidy
-
 class FilterMenuAdapter(
     private val mContext: Context,
-    private var filterMenuData: FilterMenuData = FilterMenuData(),
+    var filterMenuData: FilterMenuData = FilterMenuData(),
 ) : BaseExpandableListAdapter() {
 
     override fun getGroupCount(): Int {
@@ -24,16 +22,15 @@ class FilterMenuAdapter(
     }
 
     override fun getChildrenCount(groupPosition: Int) =
-        filterMenuData.childList[filterMenuData.headerList[groupPosition]]?.size ?: 0
+        filterMenuData.filterOptionMap[filterMenuData.headerList[groupPosition]]?.size ?: 0
 
     override fun getGroup(groupPosition: Int): Any {
         return filterMenuData.headerList[groupPosition]
     }
 
-    override fun getChild(groupPosition: Int, childPosition: Int): String? {
+    override fun getChild(groupPosition: Int, childPosition: Int): Any? {
         return filterMenuData
-            .childList[filterMenuData.headerList[groupPosition]]?.get(childPosition)
-            ?.itemName
+            .filterOptionMap[filterMenuData.headerList[groupPosition]]?.get(childPosition)
     }
 
     override fun getGroupId(groupPosition: Int): Long {
@@ -53,18 +50,19 @@ class FilterMenuAdapter(
         isExpanded: Boolean,
         convertView: View?,
         parent: ViewGroup
-    ): View {
+    ): View? {
         var view = convertView
-        val header = getGroup(groupPosition) as FilterMenuItem
         if (view == null) {
             val inflater =
                 mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.filter_header, parent, false)
         }
-        val headerName = view?.findViewById(R.id.header_title) as TextView
-        headerName.setTypeface(null, Typeface.NORMAL)
-        headerName.text = header.itemName
-        return view
+        return view.apply {
+            val headerName = view?.findViewById(R.id.header_title) as TextView
+            headerName.setTypeface(null, Typeface.NORMAL)
+            val header = getGroup(groupPosition) as FilterMenuItem
+            headerName.text = header.itemName
+        }
     }
 
     override fun getChildView(
@@ -73,37 +71,34 @@ class FilterMenuAdapter(
         isLastChild: Boolean,
         convertView: View?,
         parent: ViewGroup
-    ): View {
+    ): View? {
         var view = convertView
-        val childText = getChild(groupPosition, childPosition) as String
-        val childItem = getGroup(groupPosition) as FilterMenuItem
         if (view == null) {
             val inflater = this.mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.filter_child, parent, false)
         }
-        val childName = view!!
-            .findViewById(R.id.child_title) as TextView
-        val childIcon = view
-            .findViewById(R.id.child_icon) as ImageView
-        childName.text = childText
-        if(childItem.selected) {
-            childIcon.setImageResource(R.drawable.ic_check)
-            childIcon.visibility = VISIBLE
-        } else {
-            childIcon.visibility = INVISIBLE
+        return view?.apply {
+            val childName = findViewById<TextView>(R.id.child_title)
+            val childIcon = findViewById<ImageView>(R.id.child_icon)
+            val childItem = getChild(groupPosition, childPosition) as FilterMenuItem
+            childName.text = childItem.itemName
+            if (childItem.selected) {
+                childIcon.setImageResource(R.drawable.ic_check)
+                childIcon.visibility = VISIBLE
+            } else {
+                childIcon.visibility = INVISIBLE
+            }
         }
-        return view
     }
 
-    override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean {
-        return true
-    }
+    override fun isChildSelectable(groupPosition: Int, childPosition: Int) = true
 
     fun setData(filterMenuData: FilterMenuData) {
         this.filterMenuData = filterMenuData
         notifyDataSetChanged()
     }
 
-    fun getData() = filterMenuData
+    fun getFilterMenuItem(groupPosition: Int, childPosition: Int) =
+        getChild(groupPosition, childPosition) as FilterMenuItem?
 }

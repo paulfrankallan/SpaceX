@@ -7,22 +7,6 @@ import com.corbstech.spacex.shared.ui.filterdrawer.FilterMenuItem
 import com.corbstech.spacex.shared.ui.list.RecyclerItem
 import java.util.*
 
-sealed class Action {
-    class FilterMenuItemClicked(val filterMenuItem: FilterMenuItem) : Action()
-    class LaunchItemLinkClicked(val launchItemLink: LaunchItemLink) : Action()
-}
-
-sealed class Order {
-    object Asc : Order()
-    object Desc : Order()
-    object None : Order()
-}
-
-sealed class Event {
-    val uniqueId: String = UUID.randomUUID().toString()
-    class LaunchWebBrowser(val url: String) : Event()
-}
-
 data class ViewSate(
     val filterMenuData: FilterMenuData = FilterMenuData(),
     val staticItems: List<RecyclerItem> = listOf(),
@@ -30,4 +14,23 @@ data class ViewSate(
     val events: List<Event> = emptyList()
 ) {
     fun getItems() = listOf(staticItems, launchItems).flatten()
+}
+
+sealed class Action {
+    class FilterMenuItemClicked(
+        val filterMenuGroup: FilterMenuItem,
+        val filterMenuItem: FilterMenuItem
+    ) : Action()
+    class LaunchItemLinkClicked(val launchItemLink: LaunchItemLink) : Action()
+}
+
+sealed class Event {
+    val uniqueId: String = UUID.randomUUID().toString()
+    class LaunchWebBrowser(val url: String) : Event()
+}
+
+sealed class SortOrder {
+    object Asc : SortOrder()
+    object Desc : SortOrder()
+    object None : SortOrder()
 }

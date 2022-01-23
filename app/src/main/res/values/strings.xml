@@ -17,9 +17,13 @@
     <string name="launches">LAUNCHES</string>
     <string name="failed">Failed</string>
     <string name="succeeded">Succeeded</string>
+    <string name="pending">Pending</string>
     <string name="desc">DESC</string>
     <string name="asc">ASC</string>
     <string name="launch_success">LAUNCH SUCCESS</string>
     <string name="launch_year">LAUNCH YEAR</string>
     <string name="tick_icon">Tick Icon</string>
+    <string name="article">Article</string>
+    <string name="video">Video</string>
+    <string name="wikipedia">Wikipedia</string>
 </resources>

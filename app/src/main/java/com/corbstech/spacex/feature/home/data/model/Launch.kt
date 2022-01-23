@@ -1,6 +1,5 @@
 package com.corbstech.spacex.feature.home.data.model
 
-import com.corbstech.spacex.shared.ui.list.RecyclerItem
 import com.google.gson.annotations.SerializedName
 
 data class Launch(
@@ -8,15 +7,13 @@ data class Launch(
     @SerializedName("date_unix") val dateUnix: Long?,
     @SerializedName("date_utc") val dateUtc: String?,
     @SerializedName("date_local") val dateLocal: String?,
-    @SerializedName("success") val success: Boolean = false,
+    @SerializedName("success") val success: Boolean? = null,
     @SerializedName("links") val links: Links?,
     @SerializedName("details") val details: String?,
     @SerializedName("name") val name: String?,
     @SerializedName("rocket") val rocket: Rocket?,
-    @SerializedName("id") override val id: String,
-    var launchYear: Long? = null,
-    var successImageResource: Int? = null
-) : RecyclerItem
+    @SerializedName("id") val id: String,
+)
 
 data class Rocket(
     @SerializedName("name") val name: String?,

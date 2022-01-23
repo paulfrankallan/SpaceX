@@ -90,9 +90,11 @@
         android:layout_marginStart="8dp"
         android:text="@string/mission"
         android:textSize="14sp"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="@+id/labelMission"
         app:layout_constraintTop_toTopOf="@+id/labelMission"
         app:layout_constraintStart_toEndOf="@id/barrier"
+        app:layout_constraintEnd_toStartOf="@+id/image_success"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="Mission name"
         />

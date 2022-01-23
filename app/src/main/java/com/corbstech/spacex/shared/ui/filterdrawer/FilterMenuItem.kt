@@ -1,29 +1,28 @@
 package com.corbstech.spacex.shared.ui.filterdrawer
 
-import com.corbstech.spacex.shared.Order
+import com.corbstech.spacex.shared.SortOrder
 import java.util.*
 
 data class FilterMenuItem(
     val uniqueId: String = UUID.randomUUID().toString(),
     val itemName: String = "",
     val selected: Boolean = false,
-    val filterMenuEvent: FilterMenuEvent = FilterMenuEvent.None
+    val filterMenuType: FilterMenuType,
 ) {
-    sealed class FilterMenuEvent {
-        class Sort(val order: Order = Order.None) : FilterMenuEvent()
-        class Filter(val filterType: FilterType = FilterType.None) : FilterMenuEvent()
-        object None : FilterMenuEvent()
+    sealed class FilterMenuType {
+        class Sort(val sortOrder: SortOrder = SortOrder.None) : FilterMenuType()
+        class Filter(val filterType: FilterType) : FilterMenuType()
     }
 
     sealed class FilterType {
-        class Year(val year: String) : FilterType()
-        class Success(val outcome: SuccessOutcome) : FilterType()
-        object None : FilterType()
+        class Year(val year: Int? = null) : FilterType()
+        class Success(val successOutcome: SuccessOutcome) : FilterType()
     }
 
     sealed class SuccessOutcome {
         object Succeeded: SuccessOutcome()
         object Failed : SuccessOutcome()
-        object None : SuccessOutcome()
+        object Pending : SuccessOutcome()
+        object All : SuccessOutcome()
     }
 }

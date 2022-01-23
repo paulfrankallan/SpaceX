@@ -16,13 +16,19 @@ class LaunchItemViewHolder(private val binding: ListItemLaunchBinding) :
             valueRocket.text = launchItem.rocket
             labelDays.text = launchItem.daysLabelAndValue?.first
             valueDays.text = launchItem.daysLabelAndValue?.second
-            launchItem.successImage?.let { imageSuccess.setImageResource(it) }
+            when (launchItem.success) {
+                true,
+                false -> {
+                    launchItem.successImage?.let { imageSuccess.setImageResource(it) }
+                }
+                else -> {
+                    imageSuccess.setImageDrawable(null)
+                }
+            }
             GlideApp.with(itemView.context)
                 .load(launchItem.patchImage)
                 .transition(withCrossFade())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.ic_launcher_foreground_dark)
-                .error(R.drawable.ic_launcher_foreground_dark)
                 .into(imagePatch)
         }
     }

@@ -9,6 +9,10 @@ class ListAdapter(
   private val listener: AdapterListener? = null
 ) : ListAdapter<RecyclerItem, RecyclerView.ViewHolder>(BASE_DIFF_CALLBACK) {
 
+  init {
+      setHasStableIds(true)
+  }
+
   private val viewTypes: ItemViewTypes<RecyclerItem> = ItemViewTypes(itemViewTypes)
 
   override fun getItemViewType(position: Int): Int {
@@ -23,5 +27,9 @@ class ListAdapter(
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     val item = getItem(position)
     viewTypes.of(item).bind(holder, item, listener)
+  }
+
+  override fun getItemId(position: Int): Long {
+    return getItem(position).id
   }
 }

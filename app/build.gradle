@@ -79,6 +79,21 @@ dependencies {
 
     // Test
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2"
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation ('org.threeten:threetenbp:1.5.2'){
+        exclude group:'com.jakewharton.threetenabp', module:'threetenabp'
+    }
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // Hilt instrumentation tests
+    androidTestImplementation  "com.google.dagger:hilt-android-testing:$hiltVersion"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hiltVersion"
+    // Hilt local unit tests
+    testImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
+    kaptTest "com.google.dagger:hilt-android-compiler:$hiltVersion"
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

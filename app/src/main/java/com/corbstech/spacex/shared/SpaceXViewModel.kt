@@ -39,6 +39,7 @@ open class SpaceXViewModel @Inject constructor(
 
     private val actionDispatcher = MutableSharedFlow<Action>()
     private val mutableState = MutableStateFlow(ViewSate())
+    private val launchItems = mutableListOf<LaunchItem>()
     val state: StateFlow<ViewSate>
         get() = mutableState
 
@@ -55,12 +56,10 @@ open class SpaceXViewModel @Inject constructor(
                     LaunchDataRequestBody(Options(), Query)
                 ).body() ?: LaunchData()
             }
-            val launchItems = buildLaunchItemsList(launchData.launches)
+            launchItems.addAll(buildLaunchItemsList(launchData.launches))
             mutableState.value = ViewSate(
                 filterMenuData = buildFilterMenu(launchItems),
-                staticItems = buildStaticItemsList(
-                    company = company
-                ),
+                staticItems = buildStaticItemsList(company = company),
                 launchItems = launchItems
             )
         }
@@ -72,22 +71,25 @@ open class SpaceXViewModel @Inject constructor(
         company: Company
     ): List<RecyclerItem> {
         return listOf(
-            HeaderItem(title = resourceProvider.getResource(R.string.company)),
-            buildCompanyItem(company),
-            HeaderItem(title = resourceProvider.getResource(R.string.launches))
-        )
-    }
-
-    private fun buildCompanyItem(company: Company): CompanyItem {
-        return CompanyItem(
-            info = resourceProvider.getResource(
-                R.string.company_info,
-                company.name,
-                company.founder,
-                company.founded,
-                company.employees,
-                company.launchSites,
-                NumberFormat.getInstance(Locale.getDefault()).format(company.valuation),
+            HeaderItem(
+                id = -1L,
+                title = resourceProvider.getResource(R.string.company)
+            ),
+            CompanyItem(
+                id = -2L,
+                info = resourceProvider.getResource(
+                    R.string.company_info,
+                    company.name,
+                    company.founder,
+                    company.founded,
+                    company.employees,
+                    company.launchSites,
+                    NumberFormat.getInstance(Locale.getDefault()).format(company.valuation),
+                )
+            ),
+            HeaderItem(
+                id = -3L,
+                title = resourceProvider.getResource(R.string.launches)
             )
         )
     }
@@ -96,42 +98,86 @@ open class SpaceXViewModel @Inject constructor(
 
     // region Launch items
 
-    private fun updateLaunchItems(filterMenuEvent: FilterMenuItem.FilterMenuEvent) {
+    private fun updateLaunchItems() {
         mutableState.update { current ->
-
-            current.copy()
+            val successSelections = mutableListOf<FilterMenuItem.SuccessOutcome>()
+            val yearSelections = mutableListOf<Int>()
+            var order: SortOrder = SortOrder.None
+            current.filterMenuData.filterOptionMap.values.flatten().forEach {
+                when (it.filterMenuType) {
+                    is FilterMenuItem.FilterMenuType.Filter -> {
+                        when (it.filterMenuType.filterType) {
+                            is FilterMenuItem.FilterType.Year -> {
+                                it.filterMenuType.filterType.year?.let { year ->
+                                    if (it.selected) yearSelections.add(year)
+                                }
+                            }
+                            is FilterMenuItem.FilterType.Success -> {
+                                if (it.selected) {
+                                    successSelections.add(it.filterMenuType.filterType.successOutcome)
+                                }
+                            }
+                        }
+                    }
+                    is FilterMenuItem.FilterMenuType.Sort -> {
+                        if (it.selected) {
+                            order = it.filterMenuType.sortOrder
+                        }
+                    }
+                }
+            }
+            current.copy(
+                launchItems = launchItems.filter {
+                    yearSelections.checkYear(it.year) && checkSuccessOutcome(
+                        successOutcome = it.success,
+                        successSelections = successSelections
+                    )
+                }.sortLaunchItems(order)
+            )
         }
     }
 
-    private fun List<LaunchItem>.filterLaunchItems(
-        filterType: FilterMenuItem.FilterType
-    ) = when (filterType) {
-        is FilterMenuItem.FilterType.Year -> this
-        is FilterMenuItem.FilterType.Success -> this
-        is FilterMenuItem.FilterType.None -> this
+    private fun List<Int>.checkYear(yearFilter: Int?) = isEmpty() || contains(yearFilter)
+
+    private fun checkSuccessOutcome(
+        successOutcome: Boolean?, successSelections: List<FilterMenuItem.SuccessOutcome>
+    ): Boolean {
+        return successSelections.isEmpty() || when (successOutcome) {
+            true -> {
+                successSelections.contains(FilterMenuItem.SuccessOutcome.Succeeded)
+            }
+            false -> {
+                successSelections.contains(FilterMenuItem.SuccessOutcome.Failed)
+            }
+            null -> {
+                successSelections.contains(FilterMenuItem.SuccessOutcome.Pending)
+            }
+        }
     }
 
     private fun List<LaunchItem>.sortLaunchItems(
-        order: Order
-    ) = when (order) {
-        Order.None -> this
-        Order.Asc -> this.sortedBy { it.year }
-        Order.Desc -> this.sortedByDescending { it.year }
+        sortOrder: SortOrder
+    ) = when (sortOrder) {
+        SortOrder.None -> this
+        SortOrder.Asc -> this.sortedBy { it.id }
+        SortOrder.Desc -> this.sortedByDescending { it.id }
     }
 
     private fun buildLaunchItemsList(launches: List<Launch>) = launches.map { launch ->
         val zonedDateTime = Instant.parse(launch.dateUtc).atZone(ZoneId.systemDefault())
         LaunchItem(
+            id = launch.flightNumber?.toLong() ?: 0L,
             mission = launch.name,
             date = zonedDateTime.getDisplayDateTimeFromZonedDateTime(),
             year = zonedDateTime.getYearFromZonedDateTime(),
-            rocket = launch.rocket?.name ?: "/" + launch.rocket?.type, // TODO
+            rocket = launch.rocket?.name ?: "/" + launch.rocket?.type,
             daysLabelAndValue = zonedDateTime.getDaysBetweenFromZonedDateTime(),
             patchImage = launch.links?.patch?.small?.replace("https", "http"), // TODO
-            successImage = if (launch.success) {
-                R.drawable.ic_check
-            } else {
-                R.drawable.ic_cross
+            success = launch.success,
+            successImage = when (launch.success) {
+                true -> R.drawable.ic_check
+                false -> R.drawable.ic_cross
+                else -> null
             },
             links = buildLaunchItemLinks(launch.links)
         )
@@ -142,9 +188,15 @@ open class SpaceXViewModel @Inject constructor(
     // region Launch item links
 
     private fun buildLaunchItemLinks(links: Links?) = listOf(
-        LaunchItemLink(url = links?.articleLink, title = "Article"),
-        LaunchItemLink(url = links?.webcast, title = "Video"),
-        LaunchItemLink(url = links?.wikipedia, title = "Wikipedia")
+        LaunchItemLink(
+            url = links?.articleLink, title = resourceProvider.getResource(R.string.article)
+        ),
+        LaunchItemLink(
+            url = links?.webcast, title = resourceProvider.getResource(R.string.video)
+        ),
+        LaunchItemLink(
+            url = links?.wikipedia, title = resourceProvider.getResource(R.string.wikipedia)
+        )
     ).filterNot { it.url.isNullOrBlank() }
 
     private fun onLaunchItemLinkClicked(launchItemLink: LaunchItemLink) =
@@ -164,28 +216,32 @@ open class SpaceXViewModel @Inject constructor(
         val headerList = listOf(
             FilterMenuItem(
                 itemName = resourceProvider.getResource(R.string.sort),
-                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
+                filterMenuType = FilterMenuItem.FilterMenuType.Sort()
             ),
             FilterMenuItem(
                 itemName = resourceProvider.getResource(R.string.launch_year),
-                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
+                filterMenuType = FilterMenuItem.FilterMenuType.Filter(
+                    FilterMenuItem.FilterType.Year()
+                )
             ),
             FilterMenuItem(
                 itemName = resourceProvider.getResource(R.string.launch_success),
-                filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort()
+                filterMenuType = FilterMenuItem.FilterMenuType.Filter(
+                    FilterMenuItem.FilterType.Success(FilterMenuItem.SuccessOutcome.All)
+                )
             ),
         )
         return FilterMenuData(
             headerList = headerList,
-            childList = hashMapOf(
+            filterOptionMap = hashMapOf(
                 headerList[0] to listOf(
                     FilterMenuItem(
                         itemName = resourceProvider.getResource(R.string.asc),
-                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort(Order.Asc)
+                        filterMenuType = FilterMenuItem.FilterMenuType.Sort(SortOrder.Asc)
                     ),
                     FilterMenuItem(
                         itemName = resourceProvider.getResource(R.string.desc),
-                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Sort(Order.Desc)
+                        filterMenuType = FilterMenuItem.FilterMenuType.Sort(SortOrder.Desc)
                     )
                 ),
                 headerList[1] to launchItems.distinctBy { it.year }
@@ -194,23 +250,69 @@ open class SpaceXViewModel @Inject constructor(
                     .map {
                         FilterMenuItem(
                             itemName = it.toString(),
-                            filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
+                            filterMenuType =
+                            FilterMenuItem.FilterMenuType.Filter(
+                                FilterMenuItem.FilterType.Year(it)
+                            )
                         )
                     },
                 headerList[2] to listOf(
                     FilterMenuItem(
                         itemName = resourceProvider.getResource(R.string.succeeded),
-                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
+                        filterMenuType = FilterMenuItem.FilterMenuType.Filter(
+                            FilterMenuItem.FilterType.Success(FilterMenuItem.SuccessOutcome.Succeeded)
+                        )
                     ),
                     FilterMenuItem(
                         itemName = resourceProvider.getResource(R.string.failed),
-                        filterMenuEvent = FilterMenuItem.FilterMenuEvent.Filter()
+                        filterMenuType = FilterMenuItem.FilterMenuType.Filter(
+                            FilterMenuItem.FilterType.Success(FilterMenuItem.SuccessOutcome.Failed)
+                        )
+                    ),
+                    FilterMenuItem(
+                        itemName = resourceProvider.getResource(R.string.pending),
+                        filterMenuType = FilterMenuItem.FilterMenuType.Filter(
+                            FilterMenuItem.FilterType.Success(FilterMenuItem.SuccessOutcome.Pending)
+                        )
                     )
                 )
             )
         )
     }
 
+    private fun onFilterMenuItemClicked(
+        filterMenuGroup: FilterMenuItem,
+        filterMenuItem: FilterMenuItem
+    ) {
+        updateFilterMenu(filterMenuGroup, filterMenuItem)
+        updateLaunchItems()
+    }
+
+    private fun updateFilterMenu(
+        filterMenuGroup: FilterMenuItem, filterMenuItem: FilterMenuItem
+    ) {
+        mutableState.update { current ->
+            val updateMap = current.filterMenuData.filterOptionMap.toMutableMap()
+            val updateList = updateMap[filterMenuGroup]?.toMutableList() ?: mutableListOf()
+            if (filterMenuItem.filterMenuType is FilterMenuItem.FilterMenuType.Sort) {
+                updateList.forEachIndexed { index, item ->
+                    updateList[index] = item.copy(selected = false)
+                }
+            }
+            updateList[updateList.indexOfFirst {
+                it.uniqueId == filterMenuItem.uniqueId
+            }] = filterMenuItem.copy(selected = filterMenuItem.selected.not())
+            updateMap[filterMenuGroup] = updateList
+            current.copy(
+                filterMenuData = current.filterMenuData.copy(
+                    filterOptionMap = updateMap,
+                    filtersApplied = updateMap.values.flatten().any {
+                        it.selected && it.filterMenuType !is FilterMenuItem.FilterMenuType.Sort
+                    }
+                )
+            )
+        }
+    }
 
     // endregion
 
@@ -226,45 +328,9 @@ open class SpaceXViewModel @Inject constructor(
                 onLaunchItemLinkClicked(action.launchItemLink)
             }
             is Action.FilterMenuItemClicked -> {
-                onFilterMenuItemClicked(action.filterMenuItem)
+                onFilterMenuItemClicked(action.filterMenuGroup, action.filterMenuItem)
             }
         }
-    }
-
-    private fun onFilterMenuItemClicked(filterMenuItem: FilterMenuItem) {
-        updateFilterMenuItem(filterMenuItem)
-        updateLaunchItems(filterMenuItem.filterMenuEvent)
-    }
-
-    private fun updateFilterMenuItem(filterMenuItem: FilterMenuItem) {
-
-//        filterMenuItem.copy(selected = filterMenuItem.selected.not())
-//
-//        val match = mutableState.value.filterMenuData.childList.values.flatten().first {
-//            it.uniqueId == filterMenuItem.uniqueId
-//        }.data
-
-        mutableState.update { current ->
-
-            val children = current.filterMenuData.childList.toMutableMap().forEach {
-                it.value.firstOrNull { item ->
-                    item.uniqueId == filterMenuItem.uniqueId
-                }
-            }
-            //children.replace(filterMenuItem, filterMenuItem, filterMenuItem)
-
-            current.copy(
-                filterMenuData = current.filterMenuData.copy(
-                    childList = current.filterMenuData.childList
-                )
-            )
-        }
-        // filterNot { it.uniqueId == eventId }
-//        filterMenuItem.data
-    }
-
-    private fun updateYears(year: String) {
-        val result = year
     }
 
     // endregion
@@ -272,9 +338,7 @@ open class SpaceXViewModel @Inject constructor(
     // region Events
 
     fun removeConsumedEvent(eventId: String) = mutableState.update { current ->
-        current.copy(
-            events = current.events.filterNot { it.uniqueId == eventId }
-        )
+        current.copy(events = current.events.filterNot { it.uniqueId == eventId })
     }
 
     // endregion

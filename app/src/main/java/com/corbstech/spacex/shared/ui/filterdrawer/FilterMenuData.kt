@@ -1,11 +1,11 @@
 package com.corbstech.spacex.shared.ui.filterdrawer
 
-import com.corbstech.spacex.shared.Order
-import java.util.*
+import com.corbstech.spacex.shared.SortOrder
 
 data class FilterMenuData(
-    val order: Order = Order.None,
+    val sortOrder: SortOrder = SortOrder.None,
     val headerList: List<FilterMenuItem> = listOf(),
-    val childList: HashMap<FilterMenuItem, List<FilterMenuItem>> = hashMapOf()
+    val filterOptionMap: Map<FilterMenuItem, List<FilterMenuItem>> = mapOf(),
+    val filtersApplied: Boolean = false
 )
 
