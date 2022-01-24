@@ -75,9 +75,13 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
 
     private fun handleState(state: ViewSate) {
         listAdapter.submitList(state.getItems())
-        updateProgressSpinner(state.refreshing)
+        handleEvents(state.events)
         handleNoData(state)
-        state.events.forEach { event ->
+        updateProgressSpinner(state.refreshing)
+    }
+
+    private fun handleEvents(events: List<Event>) {
+        events.forEach { event ->
             when (event) {
                 is Event.LaunchWebBrowser -> {
                     launchWebBrowser(event)
