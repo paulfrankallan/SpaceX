@@ -40,7 +40,7 @@ open class SpaceXViewModel @Inject constructor(
     val state: StateFlow<ViewSate>
         get() = mutableState
 
-    fun init() {
+    init {
         viewModelScope.launch {
             handleActions()
         }
@@ -136,6 +136,7 @@ open class SpaceXViewModel @Inject constructor(
 
     private fun buildLaunchItemsList(launches: List<Launch>) = launches.map { launch ->
         val zonedDateTime = Instant.parse(launch.dateUtc).atZone(ZoneId.systemDefault())
+        val daysBetweenValue = zonedDateTime.getDaysBetweenNowAndZonedDateTime()
         LaunchItem(
             id = launch.flightNumber?.toLong() ?: 0L,
             mission = launch.name,
@@ -146,8 +147,16 @@ open class SpaceXViewModel @Inject constructor(
                 launch.rocket?.name,
                 launch.rocket?.type
             ),
-            daysLabelAndValue = zonedDateTime.getDaysBetweenNowAndZonedDateTime(),
-            patchImage = launch.links?.patch?.small?.replace("https", "http"), // TODO Remove
+            daysLabelAndValue = Pair(
+                getDaysBetweenLabel(daysBetweenValue),
+                daysBetweenValue.toString()
+            ),
+            // Looks like https functionality for some of the urls is currently broken.
+            // Had to switch to http and add a network_security_config to enable
+            // cleartext for (only) these domains, as images wouldn't display:
+            // CertificateException: Unacceptable certificate: CN=DigiCert Global Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
+            // Would investigate further if this was a production app.
+            patchImage = launch.links?.patch?.small?.replace("https", "http"),
             success = launch.success,
             successImage = when (launch.success) {
                 true -> R.drawable.ic_check
@@ -156,6 +165,12 @@ open class SpaceXViewModel @Inject constructor(
             },
             links = buildLaunchItemLinks(launch.links)
         )
+    }
+
+    private fun getDaysBetweenLabel(value: Long) = if (value < 0) {
+        resourceProvider.getResource(R.string.days_since_now)
+    } else {
+        resourceProvider.getResource(R.string.days_from_now)
     }
 
     // endregion

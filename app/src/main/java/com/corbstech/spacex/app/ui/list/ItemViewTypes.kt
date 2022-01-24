@@ -2,7 +2,7 @@ package com.corbstech.spacex.app.ui.list
 
 class ItemViewTypes<T>(types: List<ItemView<T>>) {
 
-  private val itemViewTypes: ArrayList<ItemView<T>> = ArrayList()
+  private val itemViewTypes: MutableList<ItemView<T>> = mutableListOf()
 
   init {
     types.forEach { addType(it) }
@@ -14,14 +14,18 @@ class ItemViewTypes<T>(types: List<ItemView<T>>) {
 
   fun of(item: T?): ItemView<T> {
     for (itemView in itemViewTypes) {
-      if (itemView.belongsTo(item)) return itemView
+      if (itemView.belongsTo(item)) {
+        return itemView
+      }
     }
     throw NoSuchRecyclerItemTypeException(message = item?.toString() ?: "")
   }
 
   fun of(viewType: Int): ItemView<T> {
     for (itemView in itemViewTypes) {
-      if (itemView.type() == viewType) return itemView
+      if (itemView.type() == viewType) {
+        return itemView
+      }
     }
     throw NoSuchRecyclerViewTypeException()
   }

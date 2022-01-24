@@ -1,7 +1,7 @@
 package com.corbstech.spacex.feature.list.launch
 
 import com.corbstech.spacex.app.ui.list.RecyclerItem
-import com.corbstech.spacex.app.ui.list.RecyclerItemClicked
+import com.corbstech.spacex.app.ui.list.Clickable
 
 data class LaunchItem(
     override val id: Long,
@@ -14,4 +14,4 @@ data class LaunchItem(
     val successImage: Int? = null,
     val success: Boolean? = null,
     val links: List<LaunchItemLink>,
-) : RecyclerItem, RecyclerItemClicked
+) : RecyclerItem, Clickable

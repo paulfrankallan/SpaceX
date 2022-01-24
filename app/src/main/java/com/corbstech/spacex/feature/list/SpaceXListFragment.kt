@@ -19,7 +19,7 @@ import com.corbstech.spacex.app.SpaceXViewModel
 import com.corbstech.spacex.app.ViewSate
 import com.corbstech.spacex.app.ui.list.AdapterListener
 import com.corbstech.spacex.app.ui.list.ListAdapter
-import com.corbstech.spacex.app.ui.list.RecyclerItemClicked
+import com.corbstech.spacex.app.ui.list.Clickable
 import com.corbstech.spacex.databinding.FragmentSpacexListBinding
 import com.corbstech.spacex.feature.list.company.CompanyItemView
 import com.corbstech.spacex.feature.list.header.HeaderItemView
@@ -114,7 +114,7 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
         }
     }
 
-    override fun clickListener(item: RecyclerItemClicked) {
+    override fun clickListener(item: Clickable) {
         when (item) {
             is LaunchItemLink -> {
                 spaceXViewModel.dispatch(Action.LaunchItemLinkClicked(launchItemLink = item))

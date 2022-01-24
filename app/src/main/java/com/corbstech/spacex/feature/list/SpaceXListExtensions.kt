@@ -12,18 +12,9 @@ import java.util.*
 
 private const val YEAR_FORMAT = "yyyy"
 private const val TIME_FORMAT = "hh:mm a"
-private const val TEXT_DAYS = "Days"
-private const val TEXT_SINCE = "since"
-private const val TEXT_FROM = "from"
-private const val TEXT_NOW = "now:"
 
-fun ZonedDateTime.getDaysBetweenNowAndZonedDateTime(): Pair<String, String> {
-    val value = Duration.between(ZonedDateTime.now(), this).toDays()
-    return Pair(
-        first = "$TEXT_DAYS ${if (value < 0) TEXT_SINCE else TEXT_FROM} $TEXT_NOW",
-        second = value.toString()
-    )
-}
+fun ZonedDateTime.getDaysBetweenNowAndZonedDateTime() =
+    Duration.between(ZonedDateTime.now(), this).toDays()
 
 fun ZonedDateTime.getYearFromZonedDateTime(): Int? {
     return try {
@@ -61,7 +52,7 @@ fun List<LaunchItem>.sortLaunchItems(
     SortOrder.Desc -> this.sortedByDescending { it.id }
 }
 
-fun List<Int>.checkYear(yearFilter: Int?) = isEmpty() || contains(yearFilter)
+fun List<Int>.checkYear(yearFilter: Int?) = isEmpty() || this.contains(yearFilter)
 
 fun List<FilterMenuItem.SuccessOutcome>.checkSuccessOutcome(successValue: Boolean?): Boolean {
     return this.isEmpty() || when (successValue) {

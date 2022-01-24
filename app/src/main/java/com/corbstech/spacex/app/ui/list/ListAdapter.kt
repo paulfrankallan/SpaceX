@@ -15,21 +15,13 @@ class ListAdapter(
 
   private val viewTypes: ItemViewTypes<RecyclerItem> = ItemViewTypes(itemViewTypes)
 
-  override fun getItemViewType(position: Int): Int {
-    val item = getItem(position)
-    return viewTypes.of(item).type()
-  }
+  override fun getItemViewType(position: Int) = viewTypes.of(getItem(position)).type()
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-    return viewTypes.of(viewType).holder(parent)
-  }
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+    viewTypes.of(viewType).holder(parent)
 
-  override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-    val item = getItem(position)
-    viewTypes.of(item).bind(holder, item, listener)
-  }
+  override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
+    getItem(position).let { viewTypes.of(it).bind(holder, it, listener) }
 
-  override fun getItemId(position: Int): Long {
-    return getItem(position).id
-  }
+  override fun getItemId(position: Int) = getItem(position).id
 }

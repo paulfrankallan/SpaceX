@@ -46,7 +46,7 @@ class SpaceXViewModelTest {
     }
 
     @Test
-    fun `Happy path synced Company & Launch data propagated to ViewState`() = runBlocking {
+    fun `Happy path synced Company & Launch data propagated to ViewState`() {
 
         whenever(resourceProvider.getResource(any())).thenReturn("Test String")
         whenever(resourceProvider.getResource(any(), any())).thenReturn("Test String 2")
@@ -71,34 +71,39 @@ class SpaceXViewModelTest {
 
         val launchData = LaunchData(launches = listOf(launch))
 
-        whenever(spaceXApi.getCompany()).thenReturn(Response.success(company))
-        whenever(
-            spaceXApi.getLaunchData(
-                LaunchDataRequestBody(Options(), Query)
+        runBlocking {
+
+            whenever(spaceXApi.getCompany()).thenReturn(Response.success(company))
+            whenever(
+                spaceXApi.getLaunchData(
+                    LaunchDataRequestBody(Options(), Query)
+                )
+            ).thenReturn(
+                Response.success(launchData)
             )
-        ).thenReturn(
-            Response.success(launchData)
-        )
 
-        spaceXViewModel.init()
+            spaceXViewModel = SpaceXViewModel(
+                spaceXApi = spaceXApi,
+                resourceProvider = resourceProvider,
+                ioDispatcher = Dispatchers.Main
+            )
 
-        assertThat(spaceXViewModel.state.value.staticItems.size, `is`(3))
+            assertThat(spaceXViewModel.state.value.staticItems.size, `is`(3))
 
-        assertThat(
-            (spaceXViewModel.state.value.staticItems[1] as CompanyItem).info,
-            `is`("Test String 2")
-        )
+            assertThat(
+                (spaceXViewModel.state.value.staticItems[1] as CompanyItem).info,
+                `is`("Test String 2")
+            )
 
-        assertThat(spaceXViewModel.state.value.launchItems.size, `is`(1))
+            assertThat(spaceXViewModel.state.value.launchItems.size, `is`(1))
 
-        assertThat(spaceXViewModel.state.value.launchItems[0].mission, `is`(launch.name))
-        assertThat(spaceXViewModel.state.value.launchItems[0].success, `is`(launch.success))
+            assertThat(spaceXViewModel.state.value.launchItems[0].mission, `is`(launch.name))
+            assertThat(spaceXViewModel.state.value.launchItems[0].success, `is`(launch.success))
+        }
     }
 
     @Test
     fun `Dispatching Action LaunchItemLinkClicked should trigger Event LaunchWebBrowser with url`() {
-
-        spaceXViewModel.init()
 
         val uniqueId = "1"
 
@@ -115,8 +120,6 @@ class SpaceXViewModelTest {
 
     @Test
     fun `Removing ConsumedEvent results in the event being removed`() {
-
-        spaceXViewModel.init()
 
         val uniqueId = "1"
 
@@ -142,8 +145,6 @@ class SpaceXViewModelTest {
 
     @Test
     fun `Removing ConsumedEvent results in the correct Event being removed`() {
-
-        spaceXViewModel.init()
 
         val uniqueId1 = "1"
         val uniqueId2 = "2"

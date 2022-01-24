@@ -35,7 +35,6 @@ class SpaceXActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        spaceXViewModel.init()
         binding = ActivitySpacexBinding.inflate(layoutInflater)
         filterMenuAdapter = FilterMenuAdapter(this)
         with(binding) {

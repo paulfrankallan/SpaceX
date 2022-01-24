@@ -2,6 +2,7 @@ package com.corbstech.spacex.feature
 
 import com.corbstech.spacex.feature.filtermenu.FilterMenuItem
 import com.corbstech.spacex.feature.list.checkSuccessOutcome
+import com.corbstech.spacex.feature.list.checkYear
 import com.corbstech.spacex.feature.list.formatLongToLocalCurrency
 import com.corbstech.spacex.feature.list.getDaysBetweenNowAndZonedDateTime
 import org.hamcrest.CoreMatchers.equalTo
@@ -13,6 +14,16 @@ import org.junit.Test
 import org.threeten.bp.ZonedDateTime
 
 class SpaceXListExtensionsTest {
+
+    @Test
+    fun `checkYear should return true ONLY if year is contained in the selected years list`() {
+
+        val selectedYears = listOf(2022, 2021, 2020)
+
+        assertTrue(selectedYears.checkYear(2021))
+
+        assertFalse(selectedYears.checkYear(2012))
+    }
 
     @Test
     fun `Format Long to local currency number format - confirm success`() {
@@ -35,17 +46,11 @@ class SpaceXListExtensionsTest {
     @Test
     fun `Get days between value and text from future ZonedDateTime`() {
 
-        val test100DaysFromNow = ZonedDateTime.now().plusDays(100).plusMinutes(1)
-        val expectedString = "Days from now:"
-        val expectedDaysUntil100 = "99"
+        val test100DaysFromNow = ZonedDateTime.now().plusDays(100)
+        val expectedDaysUntil100 = 99L
 
         assertThat(
-            test100DaysFromNow.getDaysBetweenNowAndZonedDateTime().first,
-            equalTo(expectedString)
-        )
-
-        assertThat(
-            test100DaysFromNow.getDaysBetweenNowAndZonedDateTime().second,
+            test100DaysFromNow.getDaysBetweenNowAndZonedDateTime(),
             equalTo(expectedDaysUntil100)
         )
     }
@@ -53,18 +58,12 @@ class SpaceXListExtensionsTest {
     @Test
     fun `Get days between value and text from past ZonedDateTime`() {
 
-        val test100DaysFromNow = ZonedDateTime.now().minusDays(100)
-        val expectedString = "Days since now:"
-        val expectedDaysUntil100 = "-100"
+        val test100DaysSinceNow = ZonedDateTime.now().minusDays(100)
+        val expectedDaysSince100 = -100L
 
         assertThat(
-            test100DaysFromNow.getDaysBetweenNowAndZonedDateTime().first,
-            equalTo(expectedString)
-        )
-
-        assertThat(
-            test100DaysFromNow.getDaysBetweenNowAndZonedDateTime().second,
-            equalTo(expectedDaysUntil100)
+            test100DaysSinceNow.getDaysBetweenNowAndZonedDateTime(),
+            equalTo(expectedDaysSince100)
         )
     }
 

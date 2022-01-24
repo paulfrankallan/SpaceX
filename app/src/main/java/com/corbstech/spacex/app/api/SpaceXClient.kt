@@ -6,7 +6,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class SpaceXClient() {
+class SpaceXClient {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
@@ -16,6 +16,7 @@ class SpaceXClient() {
                     setLevel(HttpLoggingInterceptor.Level.BODY)
                 }).build()
         ).build()
+
     val api: SpaceXApi by lazy {
         retrofit.create(
             SpaceXApi::class.java
