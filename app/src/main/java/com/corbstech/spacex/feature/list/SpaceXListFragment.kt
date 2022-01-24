@@ -17,14 +17,14 @@ import com.corbstech.spacex.app.Action
 import com.corbstech.spacex.app.Event
 import com.corbstech.spacex.app.SpaceXViewModel
 import com.corbstech.spacex.app.ViewSate
+import com.corbstech.spacex.app.ui.list.AdapterListener
+import com.corbstech.spacex.app.ui.list.ListAdapter
+import com.corbstech.spacex.app.ui.list.RecyclerItemClicked
 import com.corbstech.spacex.databinding.FragmentSpacexListBinding
 import com.corbstech.spacex.feature.list.company.CompanyItemView
 import com.corbstech.spacex.feature.list.header.HeaderItemView
 import com.corbstech.spacex.feature.list.launch.LaunchItemLink
 import com.corbstech.spacex.feature.list.launch.LaunchItemView
-import com.corbstech.spacex.app.ui.list.AdapterListener
-import com.corbstech.spacex.app.ui.list.ListAdapter
-import com.corbstech.spacex.app.ui.list.RecyclerItemClicked
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import java.util.*

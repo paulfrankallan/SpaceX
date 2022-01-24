@@ -7,8 +7,8 @@ import com.corbstech.spacex.app.api.SpaceXApi
 import com.corbstech.spacex.app.api.model.*
 import com.corbstech.spacex.app.framework.ResourceProvider
 import com.corbstech.spacex.app.ui.list.RecyclerItem
-import com.corbstech.spacex.feature.filtermenu.FilterMenuState
 import com.corbstech.spacex.feature.filtermenu.FilterMenuItem
+import com.corbstech.spacex.feature.filtermenu.FilterMenuState
 import com.corbstech.spacex.feature.filtermenu.SortOrder
 import com.corbstech.spacex.feature.list.*
 import com.corbstech.spacex.feature.list.company.CompanyItem

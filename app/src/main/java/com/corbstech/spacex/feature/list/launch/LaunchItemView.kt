@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.corbstech.spacex.R
-import com.corbstech.spacex.databinding.ListItemLaunchBinding
 import com.corbstech.spacex.app.ui.list.AdapterListener
 import com.corbstech.spacex.app.ui.list.ItemView
 import com.corbstech.spacex.app.ui.list.RecyclerItem
+import com.corbstech.spacex.databinding.ListItemLaunchBinding
 
 object LaunchItemView : ItemView<RecyclerItem>() {
     private const val POPUP_MENU_TITLE = "Links"

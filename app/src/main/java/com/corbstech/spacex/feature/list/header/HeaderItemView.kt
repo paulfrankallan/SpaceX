@@ -4,10 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.corbstech.spacex.R
-import com.corbstech.spacex.databinding.ListItemHeaderBinding
 import com.corbstech.spacex.app.ui.list.AdapterListener
 import com.corbstech.spacex.app.ui.list.ItemView
 import com.corbstech.spacex.app.ui.list.RecyclerItem
+import com.corbstech.spacex.databinding.ListItemHeaderBinding
 
 object HeaderItemView : ItemView<RecyclerItem>() {
 
