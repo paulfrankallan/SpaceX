@@ -1,11 +1,15 @@
-package com.corbstech.spacex.app.ui.filterdrawer
+package com.corbstech.spacex.feature.filtermenu
 
-import com.corbstech.spacex.app.SortOrder
-
-data class FilterMenuData(
+data class FilterMenuState(
     val sortOrder: SortOrder = SortOrder.None,
     val headerList: List<FilterMenuItem> = listOf(),
     val filterOptionMap: Map<FilterMenuItem, List<FilterMenuItem>> = mapOf(),
     val filtersApplied: Boolean = false
 )
+
+sealed class SortOrder {
+    object Asc : SortOrder()
+    object Desc : SortOrder()
+    object None : SortOrder()
+}
 

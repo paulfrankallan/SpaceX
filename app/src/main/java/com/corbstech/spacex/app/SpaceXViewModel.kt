@@ -3,39 +3,33 @@ package com.corbstech.spacex.app
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.corbstech.spacex.R
-import com.corbstech.spacex.app.api.model.LaunchDataRequestBody
-import com.corbstech.spacex.app.api.model.Options
-import com.corbstech.spacex.app.api.model.Query
 import com.corbstech.spacex.app.api.SpaceXApi
-import com.corbstech.spacex.app.api.model.Company
-import com.corbstech.spacex.app.api.model.Launch
-import com.corbstech.spacex.app.api.model.LaunchData
-import com.corbstech.spacex.app.api.model.Links
+import com.corbstech.spacex.app.api.model.*
 import com.corbstech.spacex.app.framework.ResourceProvider
+import com.corbstech.spacex.app.ui.list.RecyclerItem
+import com.corbstech.spacex.feature.filtermenu.FilterMenuState
+import com.corbstech.spacex.feature.filtermenu.FilterMenuItem
+import com.corbstech.spacex.feature.filtermenu.SortOrder
+import com.corbstech.spacex.feature.list.*
 import com.corbstech.spacex.feature.list.company.CompanyItem
 import com.corbstech.spacex.feature.list.header.HeaderItem
 import com.corbstech.spacex.feature.list.launch.LaunchItem
 import com.corbstech.spacex.feature.list.launch.LaunchItemLink
-import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuData
-import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuItem
-import com.corbstech.spacex.app.ui.list.RecyclerItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
-import java.text.NumberFormat
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 open class SpaceXViewModel @Inject constructor(
     private val spaceXApi: SpaceXApi,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private var ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
     // region Members & init
@@ -46,7 +40,7 @@ open class SpaceXViewModel @Inject constructor(
     val state: StateFlow<ViewSate>
         get() = mutableState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             handleActions()
         }
@@ -60,36 +54,41 @@ open class SpaceXViewModel @Inject constructor(
     // region Network data source
 
     private suspend fun syncSpaceXData() {
-        var companyData: Company? = null
-        var launchData: LaunchData? = null
-        coroutineScope {
-            try {
-                spaceXApi.getCompany().body()?.let {
-                    companyData = it
-                }
-                spaceXApi.getLaunchData(LaunchDataRequestBody(Options(), Query)).body()?.let {
-                    launchData = it
-                }
-            } catch (e: Throwable) {
-                mutableState.update { current ->
-                    current.copy(refreshing = false, noData = true)
+        withContext(ioDispatcher) {
+            mutableState.update { current ->
+                current.copy(refreshing = true)
+            }
+            var companyData: Company? = null
+            var launchData: LaunchData? = null
+            coroutineScope {
+                try {
+                    spaceXApi.getCompany().body()?.let {
+                        companyData = it
+                    }
+                    spaceXApi.getLaunchData(LaunchDataRequestBody(Options(), Query)).body()?.let {
+                        launchData = it
+                    }
+                } catch (e: Throwable) {
+                    mutableState.update { current ->
+                        current.copy(refreshing = false, noData = true)
+                    }
                 }
             }
+            loadViewState(companyData, launchData)
         }
-        updateViewState(companyData, launchData)
     }
 
     // endregion
 
     // region View state
 
-    private fun updateViewState(companyData: Company?, launchData: LaunchData?) {
+    private fun loadViewState(companyData: Company?, launchData: LaunchData?) {
         companyData?.let { company ->
             launchData?.launches?.let { launches ->
                 launchItems.addAll(buildLaunchItemsList(launches))
                 mutableState.update { current ->
                     current.copy(
-                        filterMenuData = buildFilterMenu(launchItems),
+                        filterMenuState = buildFilterMenu(launchItems),
                         staticItems = buildStaticItemsList(company = company),
                         launchItems = launchItems,
                         refreshing = false,
@@ -131,9 +130,6 @@ open class SpaceXViewModel @Inject constructor(
         )
     }
 
-    private fun Long?.formatLongToLocalCurrency() =
-        this?.let { NumberFormat.getInstance(Locale.getDefault()).format(this) } ?: ""
-
     // endregion
 
     // region Launch items
@@ -145,9 +141,13 @@ open class SpaceXViewModel @Inject constructor(
             mission = launch.name,
             date = zonedDateTime.getDisplayDateTimeFromZonedDateTime(),
             year = zonedDateTime.getYearFromZonedDateTime(),
-            rocket = launch.rocket?.name ?: "/" + launch.rocket?.type,
-            daysLabelAndValue = zonedDateTime.getDaysBetweenFromZonedDateTime(),
-            patchImage = launch.links?.patch?.small?.replace("https", "http"), // TODO
+            rocket = resourceProvider.getResource(
+                R.string.rocket_info,
+                launch.rocket?.name,
+                launch.rocket?.type
+            ),
+            daysLabelAndValue = zonedDateTime.getDaysBetweenNowAndZonedDateTime(),
+            patchImage = launch.links?.patch?.small?.replace("https", "http"), // TODO Remove
             success = launch.success,
             successImage = when (launch.success) {
                 true -> R.drawable.ic_check
@@ -167,7 +167,7 @@ open class SpaceXViewModel @Inject constructor(
             val successSelections = mutableListOf<FilterMenuItem.SuccessOutcome>()
             val yearSelections = mutableListOf<Int>()
             var order: SortOrder = SortOrder.None
-            current.filterMenuData.filterOptionMap.values.flatten().forEach {
+            current.filterMenuState.filterOptionMap.values.flatten().forEach {
                 when (it.filterMenuType) {
                     is FilterMenuItem.FilterMenuType.Filter -> {
                         when (it.filterMenuType.filterType) {
@@ -194,39 +194,11 @@ open class SpaceXViewModel @Inject constructor(
             }
             current.copy(
                 launchItems = launchItems.filter {
-                    yearSelections.checkYear(it.year) && checkSuccessOutcome(
-                        successOutcome = it.success,
-                        successSelections = successSelections
-                    )
+                    yearSelections.checkYear(it.year) &&
+                            successSelections.checkSuccessOutcome(successValue = it.success)
                 }.sortLaunchItems(order)
             )
         }
-    }
-
-    private fun List<Int>.checkYear(yearFilter: Int?) = isEmpty() || contains(yearFilter)
-
-    private fun checkSuccessOutcome(
-        successOutcome: Boolean?, successSelections: List<FilterMenuItem.SuccessOutcome>
-    ): Boolean {
-        return successSelections.isEmpty() || when (successOutcome) {
-            true -> {
-                successSelections.contains(FilterMenuItem.SuccessOutcome.Succeeded)
-            }
-            false -> {
-                successSelections.contains(FilterMenuItem.SuccessOutcome.Failed)
-            }
-            null -> {
-                successSelections.contains(FilterMenuItem.SuccessOutcome.Pending)
-            }
-        }
-    }
-
-    private fun List<LaunchItem>.sortLaunchItems(
-        sortOrder: SortOrder
-    ) = when (sortOrder) {
-        SortOrder.None -> this
-        SortOrder.Asc -> this.sortedBy { it.id }
-        SortOrder.Desc -> this.sortedByDescending { it.id }
     }
 
     // endregion
@@ -245,11 +217,11 @@ open class SpaceXViewModel @Inject constructor(
         )
     ).filterNot { it.url.isNullOrBlank() }
 
-    private fun onLaunchItemLinkClicked(launchItemLink: LaunchItemLink) =
+    private fun onLaunchItemLinkClicked(uniqueId: String, launchItemLink: LaunchItemLink) =
         launchItemLink.url?.let { url ->
             mutableState.update { current ->
                 current.copy(
-                    events = current.events + Event.LaunchWebBrowser(url = url)
+                    events = current.events + Event.LaunchWebBrowser(url = url, uniqueId = uniqueId)
                 )
             }
         }
@@ -258,7 +230,7 @@ open class SpaceXViewModel @Inject constructor(
 
     // region Filter menu
 
-    private fun buildFilterMenu(launchItems: List<LaunchItem>): FilterMenuData {
+    private fun buildFilterMenu(launchItems: List<LaunchItem>): FilterMenuState {
         val headerList = listOf(
             FilterMenuItem(
                 itemName = resourceProvider.getResource(R.string.sort),
@@ -277,7 +249,7 @@ open class SpaceXViewModel @Inject constructor(
                 )
             ),
         )
-        return FilterMenuData(
+        return FilterMenuState(
             headerList = headerList,
             filterOptionMap = hashMapOf(
                 headerList[0] to listOf(
@@ -344,7 +316,7 @@ open class SpaceXViewModel @Inject constructor(
         filterMenuGroup: FilterMenuItem, filterMenuItem: FilterMenuItem
     ) {
         mutableState.update { current ->
-            val updateMap = current.filterMenuData.filterOptionMap.toMutableMap()
+            val updateMap = current.filterMenuState.filterOptionMap.toMutableMap()
             val updateList = updateMap[filterMenuGroup]?.toMutableList() ?: mutableListOf()
             if (filterMenuItem.filterMenuType is FilterMenuItem.FilterMenuType.Sort) {
                 updateList.forEachIndexed { index, item ->
@@ -356,7 +328,7 @@ open class SpaceXViewModel @Inject constructor(
             }] = filterMenuItem.copy(selected = filterMenuItem.selected.not())
             updateMap[filterMenuGroup] = updateList
             current.copy(
-                filterMenuData = current.filterMenuData.copy(
+                filterMenuState = current.filterMenuState.copy(
                     filterOptionMap = updateMap,
                     filtersApplied = updateMap.values.flatten().any {
                         it.selected && it.filterMenuType !is FilterMenuItem.FilterMenuType.Sort
@@ -377,7 +349,7 @@ open class SpaceXViewModel @Inject constructor(
     private suspend fun handleActions(): Nothing = actionDispatcher.collect { action ->
         when (action) {
             is Action.LaunchItemLinkClicked -> {
-                onLaunchItemLinkClicked(action.launchItemLink)
+                onLaunchItemLinkClicked(action.uniqueId, action.launchItemLink)
             }
             is Action.FilterMenuItemClicked -> {
                 onFilterMenuItemClicked(action.filterMenuGroup, action.filterMenuItem)

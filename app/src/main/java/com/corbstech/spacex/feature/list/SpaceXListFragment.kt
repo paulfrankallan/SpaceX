@@ -113,7 +113,7 @@ class SpaceXListFragment : Fragment(R.layout.fragment_spacex_list), AdapterListe
     override fun clickListener(item: RecyclerItemClicked) {
         when (item) {
             is LaunchItemLink -> {
-                spaceXViewModel.dispatch(Action.LaunchItemLinkClicked(item))
+                spaceXViewModel.dispatch(Action.LaunchItemLinkClicked(launchItemLink = item))
             }
         }
     }

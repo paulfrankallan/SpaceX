@@ -21,9 +21,7 @@ class SpaceXAppModule {
     }
 
     @Provides
-    fun providesWeatherAppClient(
-        @ApplicationContext context: Context
-    ) = SpaceXClient().api
+    fun providesWeatherAppClient() = SpaceXClient().api
 
     @Provides
     fun providesDispatcher() = Dispatchers.IO

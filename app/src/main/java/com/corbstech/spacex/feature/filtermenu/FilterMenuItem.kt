@@ -1,6 +1,5 @@
-package com.corbstech.spacex.app.ui.filterdrawer
+package com.corbstech.spacex.feature.filtermenu
 
-import com.corbstech.spacex.app.SortOrder
 import java.util.*
 
 data class FilterMenuItem(

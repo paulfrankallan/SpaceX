@@ -11,6 +11,7 @@
     <string name="mission">Mission:</string>
     <string name="dateTime">Date/time:</string>
     <string name="rocket">Rocket:</string>
+    <string name="rocket_info">%1$s / %2$s</string>
     <string name="days">Days from now:</string>
     <string name="sort">SORT</string>
     <string name="company">COMPANY</string>

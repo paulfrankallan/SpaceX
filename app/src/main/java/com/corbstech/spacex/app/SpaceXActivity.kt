@@ -12,8 +12,8 @@ import androidx.core.view.GravityCompat.END
 import androidx.lifecycle.lifecycleScope
 import com.corbstech.spacex.R
 import com.corbstech.spacex.databinding.ActivitySpacexBinding
-import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuAdapter
-import com.corbstech.spacex.app.ui.filterdrawer.FilterMenuData
+import com.corbstech.spacex.feature.filtermenu.FilterMenuAdapter
+import com.corbstech.spacex.feature.filtermenu.FilterMenuState
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
@@ -35,6 +35,7 @@ class SpaceXActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        spaceXViewModel.init()
         binding = ActivitySpacexBinding.inflate(layoutInflater)
         filterMenuAdapter = FilterMenuAdapter(this)
         with(binding) {
@@ -68,7 +69,7 @@ class SpaceXActivity :
     }
 
     private fun handleState(state: ViewSate) {
-        renderFilterMenu(state.filterMenuData)
+        renderFilterMenu(state.filterMenuState)
         updateFilterIcon(state)
     }
 
@@ -79,7 +80,7 @@ class SpaceXActivity :
     private fun updateFilterIcon(state: ViewSate) {
         filterIcon = when {
             state.noData -> null
-            state.filterMenuData.filtersApplied -> R.drawable.ic_filter_check_outline
+            state.filterMenuState.filtersApplied -> R.drawable.ic_filter_check_outline
             else -> R.drawable.ic_filter_outline
         }
         invalidateOptionsMenu()
@@ -110,8 +111,8 @@ class SpaceXActivity :
         return super.onPrepareOptionsMenu(menu)
     }
 
-    private fun renderFilterMenu(filterMenuData: FilterMenuData) {
-        filterMenuAdapter.setData(filterMenuData)
+    private fun renderFilterMenu(filterMenuState: FilterMenuState) {
+        filterMenuAdapter.setData(filterMenuState)
     }
 
     override fun onGroupClick(
@@ -132,7 +133,7 @@ class SpaceXActivity :
                     spaceXViewModel.dispatch(
                         Action.FilterMenuItemClicked(
                             filterMenuGroup = filterMenuAdapter
-                                .filterMenuData.headerList[nestedGroupPosition],
+                                .filterMenuState.headerList[nestedGroupPosition],
                             filterMenuItem = it
                         )
                     )

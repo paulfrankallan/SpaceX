@@ -1,4 +1,4 @@
-package com.corbstech.spacex.app.ui.filterdrawer
+package com.corbstech.spacex.feature.filtermenu
 
 import android.content.Context
 import android.graphics.Typeface
@@ -14,23 +14,23 @@ import com.corbstech.spacex.R
 
 class FilterMenuAdapter(
     private val mContext: Context,
-    var filterMenuData: FilterMenuData = FilterMenuData(),
+    var filterMenuState: FilterMenuState = FilterMenuState(),
 ) : BaseExpandableListAdapter() {
 
     override fun getGroupCount(): Int {
-        return filterMenuData.headerList.size
+        return filterMenuState.headerList.size
     }
 
     override fun getChildrenCount(groupPosition: Int) =
-        filterMenuData.filterOptionMap[filterMenuData.headerList[groupPosition]]?.size ?: 0
+        filterMenuState.filterOptionMap[filterMenuState.headerList[groupPosition]]?.size ?: 0
 
     override fun getGroup(groupPosition: Int): Any {
-        return filterMenuData.headerList[groupPosition]
+        return filterMenuState.headerList[groupPosition]
     }
 
     override fun getChild(groupPosition: Int, childPosition: Int): Any? {
-        return filterMenuData
-            .filterOptionMap[filterMenuData.headerList[groupPosition]]?.get(childPosition)
+        return filterMenuState
+            .filterOptionMap[filterMenuState.headerList[groupPosition]]?.get(childPosition)
     }
 
     override fun getGroupId(groupPosition: Int): Long {
@@ -94,8 +94,8 @@ class FilterMenuAdapter(
 
     override fun isChildSelectable(groupPosition: Int, childPosition: Int) = true
 
-    fun setData(filterMenuData: FilterMenuData) {
-        this.filterMenuData = filterMenuData
+    fun setData(filterMenuState: FilterMenuState) {
+        this.filterMenuState = filterMenuState
         notifyDataSetChanged()
     }
 

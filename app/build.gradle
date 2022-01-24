@@ -25,8 +25,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -74,19 +74,30 @@ dependencies {
     def threeTenBpVersion = '1.5.2'
     implementation "com.jakewharton.threetenabp:threetenabp:$threeTenAbpVersion"
     testImplementation("org.threeten:threetenbp:${threeTenBpVersion}")
-//            {
-//        exclude module: "com.jakewharton.threetenabp:threetenabp:${threeTenAbpVersion}"
-//    }
 
     // Test
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation "io.mockk:mockk:1.12.2"
     testImplementation 'org.mockito:mockito-core:3.12.4'
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation ('org.threeten:threetenbp:1.5.2'){
         exclude group:'com.jakewharton.threetenabp', module:'threetenabp'
     }
+
+    // (Required) Writing and executing Unit Tests on the JUnit Platform
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation ('org.junit.jupiter:junit-jupiter:5.8.2')
+    // (Optional) If you need "Parameterized Tests"
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+
+    // (Optional) If you also have JUnit 4-based tests
+    testImplementation("junit:junit:4.13.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+
+    // Android test
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     // Hilt instrumentation tests

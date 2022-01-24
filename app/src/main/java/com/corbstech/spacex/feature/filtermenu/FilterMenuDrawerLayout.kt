@@ -1,4 +1,4 @@
-package com.corbstech.spacex.app.ui.filterdrawer
+package com.corbstech.spacex.feature.filtermenu
 
 import android.content.Context
 import android.util.AttributeSet
